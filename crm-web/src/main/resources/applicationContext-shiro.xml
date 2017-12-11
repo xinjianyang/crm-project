@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+
+    <bean id="shiroDbRealm" class="com.kaishengit.auth.ShiroDbRealm">
+
+    </bean>
+
+    <!-- cacheManage -->
+    <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"/>
+
+
+    <!-- 创建securityManager -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="shiroDbRealm"/>
+        <property name="cacheManager" ref="cacheManager"/>
+       <!-- <property name="sessionManager" ref="sessionManager"/>-->
+    </bean>
+
+    <!--配置表单鉴别器-->
+    <bean id="formAuthenticationFilter" class="org.apache.shiro.web.filter.authc.FormAuthenticationFilter">
+        <property name="passwordParam" value="password"/>
+        <property name="loginUrl" value="/login"/>
+        <property name="usernameParam" value="userName"/>
+    </bean>
+
+    <!-- 会话管理器 -->
+    <bean id="sessionManager" class="org.apache.shiro.session.mgt.DefaultSessionManager">
+        <property name="globalSessionTimeout" value="1800000"/>
+        <property name="deleteInvalidSessions" value="true"/>
+        <property name="sessionValidationSchedulerEnabled" value="true"/>
+    </bean>
+
+    <bean id="shiroFileter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!--登录的url-->
+        <property name="loginUrl" value="/login"/>
+        <!--登录成功的url-->
+        <property name="successUrl" value="/admin/home"/>
+        <!--认证失败的url-->
+        <property name="unauthorizedUrl" value="/static/html/40x.html"/>
+        <!--配置securityManager-->
+        <property name="securityManager" ref="securityManager"/>
+        
+        <property name="filters">
+            <map>
+                <entry key="authc" value-ref="formAuthenticationFilter"/>
+            </map>
+        </property>
+        <!--访问路径和角色的配置关系-->
+        <property name="filterChainDefinitions">
+            <value>
+
+                /static/** = anon
+                /favicon.ico = anon
+                /** = authc
+            </value>
+        </property>
+    </bean>
+
+</beans>
